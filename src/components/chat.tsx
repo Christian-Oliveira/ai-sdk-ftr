@@ -2,15 +2,23 @@
 
 import { Bot, User2 } from "lucide-react";
 import { ChatScrollToBottomButton } from "./chat-scroll-to-bottom-button";
-import { useEffect, useRef } from "react";
+import { useEffect, useRef, useState } from "react";
 import { MessageInput } from "./message-input";
 import { Markdown } from "./markdown";
 import { useChat } from "@ai-sdk/react";
+import { DefaultChatTransport } from "ai";
 
 export function Chat() {
-  const { messages, input, handleInputChange, handleSubmit, status } = useChat({
-    api: '/api/ai'
+  const [input, setInput] = useState('');
+  const { messages, sendMessage, status } = useChat({
+    transport: new DefaultChatTransport({ api: '/api/ai' }),
   })
+
+  const handleSubmit = (e?: React.FormEvent<HTMLFormElement>) => {
+    e?.preventDefault();
+    sendMessage({ text: input });
+    setInput('');
+  };
 
   const containerRef = useRef<HTMLDivElement>(null);
   const bottomRef = useRef<HTMLDivElement>(null);
@@ -57,12 +65,17 @@ export function Chat() {
                 </div>
               )}
 
-
-              <div className="flex flex-col gap-4">
-                <div className="flex-1 prose prose-invert prose-zinc prose-h1:text-2xl prose-h2:text-xl prose-h3:text-lg prose-h4:text-base prose-h5:text-sm prose-h6:text-xs">
-                  <Markdown>{message.content}</Markdown>
-                </div>
-              </div>
+              {message.parts.map((part, index) => {
+                if (part.type === 'text') {
+                  return (
+                    <div key={index} className="flex flex-col gap-4">
+                      <div className="flex-1 prose prose-invert prose-zinc prose-h1:text-2xl prose-h2:text-xl prose-h3:text-lg prose-h4:text-base prose-h5:text-sm prose-h6:text-xs">
+                        <Markdown>{part.text}</Markdown>
+                      </div>
+                    </div>
+                  )
+                }
+              })}
             </div>
           ))}
 
@@ -78,7 +91,7 @@ export function Chat() {
       <MessageInput
         disabled={['streaming', 'submitted'].includes(status)}
         value={input}
-        onValueChange={handleInputChange}
+        onValueChange={e => setInput(e.target.value)}
         onSubmit={handleSubmit}
       />
     </>

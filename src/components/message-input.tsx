@@ -6,7 +6,7 @@ import { useEffect, useRef, type ChangeEvent, type KeyboardEvent } from "react";
 interface MessageInputProps {
   value: string
   onValueChange: (evt: ChangeEvent<HTMLTextAreaElement>) => void
-  onSubmit: () => void
+  onSubmit: (e?: React.FormEvent<HTMLFormElement>) => void
   disabled: boolean
 }
 
@@ -29,11 +29,11 @@ export function MessageInput({ value, onValueChange, onSubmit, disabled }: Messa
   return (
     <form onSubmit={onSubmit} className="w-full max-w-3xl flex flex-col items-center gap-3">
       <div className="w-full bg-zinc-950 border rounded-lg border-zinc-900 p-4 focus-within:border-zinc-800">
-        <textarea 
-          name="message" 
-          id="message" 
-          placeholder="Ask something..." 
-          className="w-full resize-none min-h-16 outline-none disabled:opacity-50" 
+        <textarea
+          name="message"
+          id="message"
+          placeholder="Ask something..."
+          className="w-full resize-none min-h-16 outline-none disabled:opacity-50"
           value={value}
           onChange={onValueChange}
           onKeyDown={handleKeyDown}
